@@ -1,0 +1,32 @@
+name: bootstrap-labels
+# Run by hand (Actions > bootstrap-labels > Run workflow) once after creating the repo,
+# and again after /new-project adds a desk. Safe to re-run: --force updates existing labels.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vocabulary labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          jq -c '.[]' .github/labels.json | while read -r l; do
+            name=$(jq -r .name <<<"$l")
+            color=$(jq -r .color <<<"$l")
+            desc=$(jq -r .description <<<"$l")
+            gh label create "$name" --color "$color" --description "$desc" --force
+          done
+      - name: Desk labels (one per folder in projects/)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for d in projects/*/; do
+            n=$(basename "$d")
+            case "$n" in _template-*|example-*) continue;; esac
+            gh label create "desk:$n" --color bfd4f2 --description "Desk: $n" --force
+          done

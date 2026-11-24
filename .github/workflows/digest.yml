@@ -1,0 +1,52 @@
+name: daily-digest
+# Weekday mornings: reads only this repo's open issues and writes one digest issue.
+# If GitHub Models is not available, the run stays green and tells you to use /digest.
+on:
+  schedule:
+    - cron: "0 11 * * 1-5"   # 11:00 UTC = 06:00 / 07:00 Eastern; change to your time zone
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+  models: read
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip in the template repo itself
+        id: repo
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "template=$(gh api repos/${{ github.repository }} --jq .is_template)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.repo.outputs.template != 'true'
+      - name: Collect open issues
+        if: steps.repo.outputs.template != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list --state open --limit 300 \
+            --json number,title,labels,createdAt,updatedAt,body,url > open.json
+          { cat .github/prompts/digest-action.md; echo; echo "Today: $(date +%F)"; echo; cat open.json; } > prompt.txt
+      - id: ai
+        if: steps.repo.outputs.template != 'true'
+        continue-on-error: true
+        uses: actions/ai-inference@v1
+        with:
+          prompt-file: prompt.txt
+          max-tokens: 2000
+      - name: Create the digest issue
+        if: steps.ai.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BODY: ${{ steps.ai.outputs.response }}
+        run: |
+          printf '%s\n' "$BODY" > body.md
+          gh issue create --title "Digest $(date +%F)" --label digest \
+            --assignee "${{ github.actor }}" --body-file body.md
+      - name: Fallback when Models is unavailable
+        if: steps.repo.outputs.template != 'true' && steps.ai.outcome != 'success'
+        run: |
+          echo "### No digest today" >> "$GITHUB_STEP_SUMMARY"
+          echo "GitHub Models did not answer (disabled, or out of quota)." >> "$GITHUB_STEP_SUMMARY"
+          echo "Open the repo in VS Code and run /digest in Copilot Chat; it writes today.md." >> "$GITHUB_STEP_SUMMARY"

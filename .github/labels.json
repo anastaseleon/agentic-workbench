@@ -1,0 +1,16 @@
+[
+  { "name": "task",        "color": "0e8a16", "description": "Something I do; it ends" },
+  { "name": "ask",         "color": "1d76db", "description": "I asked someone; I am waiting on their answer" },
+  { "name": "commitment",  "color": "b60205", "description": "I promised this to someone, with a date" },
+  { "name": "learn",       "color": "5319e7", "description": "Something to learn or study" },
+  { "name": "someday",     "color": "d4c5f9", "description": "Not now; kept so it is not forgotten" },
+  { "name": "waiting",     "color": "bfbfbf", "description": "Blocked on someone or something else" },
+  { "name": "capture",     "color": "ededed", "description": "Raw capture, not yet triaged" },
+  { "name": "digest",      "color": "fbca04", "description": "The daily digest" },
+  { "name": "stale",       "color": "e4e669", "description": "No activity for 10 working days" },
+  { "name": "src:teams",   "color": "c5def5", "description": "Came from a Teams chat or channel" },
+  { "name": "src:meeting", "color": "c5def5", "description": "Came from a meeting" },
+  { "name": "src:email",   "color": "c5def5", "description": "Came from an email" },
+  { "name": "src:github",  "color": "c5def5", "description": "Came from GitHub (PR, review, issue)" },
+  { "name": "src:self",    "color": "c5def5", "description": "My own idea or note" }
+]

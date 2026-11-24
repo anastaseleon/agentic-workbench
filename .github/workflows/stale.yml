@@ -1,0 +1,20 @@
+name: stale
+# Daily: labels issues quiet for 10 days as stale. Never closes anything.
+on:
+  schedule:
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+permissions:
+  issues: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 10
+          days-before-close: -1
+          days-before-pr-stale: -1
+          stale-issue-label: stale
+          exempt-issue-labels: someday,waiting,digest
+          stale-issue-message: "Quiet for 10 days. Still relevant? Close with an outcome, give it a new Due date, or label it someday."
